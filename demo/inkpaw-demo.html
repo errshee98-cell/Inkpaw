@@ -1,0 +1,617 @@
+<title>Inkpaw Journal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Lora:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: app shell — top bar, then sidebar · entry list · ruled diary page; pet floats bottom-right. */
+:root{
+  --bg:#efe6d4;--paper:#fbf6ea;--paper2:#f3ead7;--ink:#3b2f2a;--soft:#7a685c;--accent:#c0714f;--aink:#fff;--asoft:#f2d9c9;--line:#e2d4bb;--rule:rgba(192,113,79,.13);
+  --petb:#f3c89a;--peti:#f0a98f;--petbelly:#fbe6cc;--good:#3f8f5f;--warn:#b4552f;
+  --shadow:0 1px 2px rgba(59,47,42,.06),0 8px 24px rgba(59,47,42,.08);
+  --f-display:'Fraunces',Georgia,serif;--f-ui:'Inter',system-ui,sans-serif;--f-write:'Lora',Georgia,serif;--f-mono:'JetBrains Mono',ui-monospace,monospace;--wsize:1.06rem;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f121b;--paper:#191d2a;--paper2:#232839;--ink:#e8e6f0;--soft:#a4a2b6;--accent:#e4b363;--aink:#1b1608;--asoft:#3a3322;--line:#2e3448;--rule:rgba(228,179,99,.09);--petb:#6a7497;--peti:#949dc0;--petbelly:#8790b3;--good:#7fd19f;--warn:#ff9a7a;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f121b;--paper:#191d2a;--paper2:#232839;--ink:#e8e6f0;--soft:#a4a2b6;--accent:#e4b363;--aink:#1b1608;--asoft:#3a3322;--line:#2e3448;--rule:rgba(228,179,99,.09);--petb:#6a7497;--peti:#949dc0;--petbelly:#8790b3;--good:#7fd19f;--warn:#ff9a7a;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+/* Diary skins chosen inside the app override the viewer theme */
+.app[data-skin=parchment]{--bg:#efe6d4;--paper:#fbf6ea;--paper2:#f3ead7;--ink:#3b2f2a;--soft:#7a685c;--accent:#c0714f;--aink:#fff;--asoft:#f2d9c9;--line:#e2d4bb;--rule:rgba(192,113,79,.13);--petb:#f3c89a;--peti:#f0a98f;--petbelly:#fbe6cc;--good:#3f8f5f;--warn:#b4552f;color-scheme:light}
+.app[data-skin=sakura]{--bg:#fbe4ea;--paper:#fffafb;--paper2:#fdeef2;--ink:#4a2c36;--soft:#8d6673;--accent:#d0577e;--aink:#fff;--asoft:#f9d4df;--line:#f1cdd8;--rule:rgba(217,102,138,.13);--petb:#fdd3dd;--peti:#f39ab2;--petbelly:#fff0f4;--good:#3f8f5f;--warn:#b4552f;color-scheme:light}
+.app[data-skin=forest]{--bg:#dfe6d3;--paper:#f7f8f0;--paper2:#edf1e3;--ink:#26331f;--soft:#5e6d55;--accent:#557f4b;--aink:#fff;--asoft:#d6e4cd;--line:#d3dcc6;--rule:rgba(95,138,85,.14);--petb:#c9b38f;--peti:#a98d68;--petbelly:#ece2cf;--good:#3f8f5f;--warn:#b4552f;color-scheme:light}
+.app[data-skin=ocean]{--bg:#d6e9ee;--paper:#f6fbfc;--paper2:#e8f3f6;--ink:#16323b;--soft:#557680;--accent:#337f95;--aink:#fff;--asoft:#cfe6ed;--line:#c9e0e6;--rule:rgba(61,140,163,.13);--petb:#bfe0ea;--peti:#8cc4d4;--petbelly:#e9f6fa;--good:#3f8f5f;--warn:#b4552f;color-scheme:light}
+.app[data-skin=lavender]{--bg:#e6dff3;--paper:#fbf9fe;--paper2:#f1ecf9;--ink:#2e2440;--soft:#6f6385;--accent:#7f60bb;--aink:#fff;--asoft:#e2d8f4;--line:#ddd3ee;--rule:rgba(138,108,196,.13);--petb:#d9cdf2;--peti:#b9a3e6;--petbelly:#f3eefc;--good:#3f8f5f;--warn:#b4552f;color-scheme:light}
+.app[data-skin=midnight]{--bg:#0f121b;--paper:#191d2a;--paper2:#232839;--ink:#e8e6f0;--soft:#a4a2b6;--accent:#e4b363;--aink:#1b1608;--asoft:#3a3322;--line:#2e3448;--rule:rgba(228,179,99,.09);--petb:#6a7497;--peti:#949dc0;--petbelly:#8790b3;--good:#7fd19f;--warn:#ff9a7a;color-scheme:dark}
+.app[data-font=hand]{--f-write:'Caveat',cursive;--wsize:1.45rem}.app[data-font=sans]{--f-write:'Inter',system-ui,sans-serif}.app[data-font=mono]{--f-write:'JetBrains Mono',monospace;--wsize:.95rem}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui)}
+.app{min-height:100%;background:var(--bg);background-image:radial-gradient(var(--rule) 1px,transparent 1px);background-size:18px 18px;color:var(--ink);display:flex;flex-direction:column;transition:background-color .3s}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:.55rem .7rem;width:100%}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:-.01em;text-wrap:balance;margin:0}
+.muted{color:var(--soft)}.tiny{font-size:.75rem}.small{font-size:.86rem}
+.btn{border:1px solid transparent;border-radius:999px;padding:.55rem 1.1rem;font-weight:600;background:var(--accent);color:var(--aink)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.sm{padding:.3rem .75rem;font-size:.82rem}
+.btn:active{transform:scale(.97)}
+.icon{background:none;border:none;padding:.3rem .45rem;border-radius:8px;line-height:1}
+.icon:hover{background:var(--paper2)}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:.3rem .75rem;font-size:.82rem}
+.chip.on{background:var(--accent);color:var(--aink);border-color:var(--accent)}
+
+/* Demo ribbon */
+.ribbon{background:var(--ink);color:var(--paper);font-size:.8rem;padding:.4rem 16px;text-align:center}
+.ribbon b{color:var(--accent)}
+
+/* Lock screen */
+.lock{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:560px}
+.lock-art{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 16px;background:radial-gradient(circle at 35% 35%,var(--asoft),transparent 65%)}
+.speech{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:.7rem 1rem;max-width:300px;text-align:center;box-shadow:var(--shadow)}
+.lock-card{background:var(--paper);display:flex;flex-direction:column;justify-content:center;gap:.9rem;padding:2rem clamp(16px,6vw,4.5rem);box-shadow:var(--shadow)}
+.lock-card h1{font-size:1.9rem}
+.lock-card label{display:flex;flex-direction:column;gap:.3rem;font-size:.86rem;font-weight:500}
+.brand{font:600 1.35rem var(--f-display)}
+.points{list-style:none;padding:0;margin:0;display:grid;gap:.5rem;font-size:.88rem;color:var(--soft)}
+.err{color:var(--warn);font-size:.85rem;min-height:1.2em;margin:0}
+
+/* Top bar */
+.top{display:flex;align-items:center;gap:.8rem;padding:.55rem 16px;background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20;flex-wrap:wrap}
+.tabs{display:flex;gap:.2rem}
+.tabs button{border:none;background:none;padding:.4rem .8rem;border-radius:999px;color:var(--soft);font-weight:500}
+.tabs button.on{background:var(--asoft);color:var(--ink)}
+.sync{margin-left:auto;display:inline-flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--soft);background:var(--paper2);padding:.25rem .65rem;border-radius:999px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--good)}
+.sync.busy i{background:var(--accent);animation:pulse 1s infinite}
+
+/* Journal */
+.view{flex:1;min-height:0}
+.journal{display:grid;grid-template-columns:230px 300px minmax(0,1fr);height:calc(100vh - 92px);min-height:560px}
+.side,.list{overflow-y:auto;padding:1rem .9rem;border-right:1px solid var(--line)}
+.side h5{margin:1.1rem 0 .35rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--soft)}
+.filt{display:flex;justify-content:space-between;width:100%;border:none;background:none;text-align:left;padding:.35rem .55rem;border-radius:8px}
+.filt:hover{background:var(--paper2)}.filt.on{background:var(--asoft);font-weight:600}
+.filt small{color:var(--soft);font-variant-numeric:tabular-nums}
+.moods{display:flex;flex-wrap:wrap;gap:.15rem}
+.mood{border:1px solid transparent;background:none;font-size:1.1rem;width:2rem;height:2rem;border-radius:50%}
+.mood.on{background:var(--asoft);border-color:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.tag{display:inline-flex;gap:.25rem;align-items:center;border:none;background:var(--paper2);border-radius:999px;padding:.12rem .55rem;font-size:.78rem;color:var(--ink)}
+.tag.on{background:var(--accent);color:var(--aink)}
+.tag button{border:none;background:none;padding:0;opacity:.6}
+.newwrap{position:relative}
+.tpl{position:absolute;top:110%;left:0;right:0;z-index:10;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:.3rem}
+.tpl button{display:flex;gap:.55rem;width:100%;border:none;background:none;text-align:left;padding:.5rem .6rem;border-radius:9px}
+.tpl button:hover{background:var(--paper2)}
+.search{border-radius:999px;margin-top:.7rem}
+.month{margin:1rem .3rem .35rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--soft)}
+.card{display:flex;gap:.7rem;width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:.7rem;margin-bottom:.45rem}
+.card:hover{border-color:var(--accent)}.card.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--asoft)}
+.date{display:flex;flex-direction:column;align-items:center;min-width:2.4rem}
+.date b{font:600 1.35rem/1 var(--f-display);color:var(--accent)}
+.date span{font-size:.66rem;text-transform:uppercase;color:var(--soft)}
+.card-b{min-width:0;flex:1}
+.card h3{font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card p{margin:.1rem 0 0;font-size:.82rem;color:var(--soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{display:flex;gap:.3rem;margin-top:.35rem;flex-wrap:wrap;align-items:center}
+.cat{font-size:.7rem;font-weight:600;color:var(--accent)}
+
+.pane{overflow-y:auto;padding:1.4rem clamp(16px,3vw,2.5rem) 8rem;min-width:0}
+.page{max-width:780px;margin:0 auto;background:var(--paper);border-radius:6px 18px 18px 6px;border-left:6px solid var(--asoft);box-shadow:var(--shadow);padding:1.4rem clamp(16px,4vw,2.6rem) 1.8rem}
+.ptop{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:.84rem;color:var(--soft)}
+.saved{margin-left:auto;font-size:.76rem;color:var(--good)}
+.star.on{color:#e5a823}
+.title{font:600 1.9rem var(--f-display);border:none;background:transparent;padding:.4rem 0}
+.title:focus-visible{outline:none;border-bottom:2px dashed var(--asoft)}
+.mrow{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin:.3rem 0}
+.mrow select{width:auto;border-radius:999px;padding:.25rem .6rem}
+.taginput{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;border-bottom:1px dashed var(--line);padding:.3rem 0 .5rem;margin-bottom:.4rem}
+.taginput input{border:none;background:transparent;width:auto;flex:1;min-width:90px;padding:.15rem}
+.tb{display:flex;flex-wrap:wrap;gap:2px;align-items:center;border-bottom:1px solid var(--line);padding:.3rem 0;position:sticky;top:0;background:var(--paper);z-index:2}
+.tb button{border:none;background:none;min-width:2rem;height:2rem;border-radius:8px;font-size:.85rem}
+.tb button:hover{background:var(--paper2)}
+.tb .sep{width:1px;height:1.2rem;background:var(--line);margin:0 .2rem}
+.tb .md{font:600 .72rem var(--f-mono);border:1px solid var(--line);padding:0 .55rem;margin-left:auto}
+.ed,.mdsrc{min-height:42vh;outline:none;font-family:var(--f-write);font-size:var(--wsize);line-height:2rem;padding:.8rem .1rem;background-image:linear-gradient(transparent calc(2rem - 1px),var(--rule) 1px);background-size:100% 2rem;background-position-y:.8rem;overflow-wrap:anywhere}
+.mdsrc{width:100%;border:none;resize:vertical;font-family:var(--f-mono);font-size:.88rem}
+.ed:empty::before{content:'Dear diary…';color:var(--soft);opacity:.6}
+.ed p,.ed div{margin:0}
+.ed h1,.ed h2,.ed h3{line-height:2rem;margin:.4rem 0 0}
+.ed h1{font-size:1.55rem}.ed h2{font-size:1.25rem;color:var(--accent)}.ed h3{font-size:1.08rem}
+.ed blockquote{margin:.4rem 0;padding:0 1rem;border-left:4px solid var(--accent);font-style:italic;color:var(--soft);background:var(--paper2);border-radius:0 10px 10px 0}
+.ed ul,.ed ol{margin:0;padding-left:1.4rem}
+.ed ul.check{list-style:none;padding-left:.2rem}
+.ed ul.check li{display:flex;gap:.5rem;align-items:baseline}
+.ed ul.check li::before{content:'';flex:none;width:1rem;height:1rem;border:2px solid var(--accent);border-radius:4px;transform:translateY(2px);cursor:pointer}
+.ed ul.check li.done{text-decoration:line-through;color:var(--soft)}
+.ed ul.check li.done::before{background:var(--accent);box-shadow:inset 0 0 0 2px var(--paper)}
+.ed mark{background:color-mix(in srgb,var(--accent) 30%,transparent);color:inherit}
+.efoot{display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;font-size:.74rem;color:var(--soft);border-top:1px solid var(--line);padding-top:.35rem}
+kbd{font:.72rem var(--f-mono);border:1px solid var(--line);border-radius:4px;padding:0 .3rem;background:var(--paper2)}
+.att{margin-top:1.2rem;border:2px dashed var(--line);border-radius:14px;padding:.9rem}
+.att.drag{border-color:var(--accent);background:var(--asoft)}
+.atthead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap}
+.attgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-top:.7rem}
+.attgrid figure{margin:0;background:var(--paper2);border-radius:12px;overflow:hidden}
+.attgrid img{width:100%;height:100px;object-fit:cover;display:block}
+.attgrid .file{height:100px;display:grid;place-items:center;font-size:2rem}
+.attgrid figcaption{display:flex;justify-content:space-between;font-size:.72rem;padding:.3rem .5rem;gap:.3rem}
+.attgrid figcaption span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cipher{margin-top:1rem;background:var(--paper2);border-radius:12px;padding:.7rem .9rem;font:.72rem/1.5 var(--f-mono);color:var(--soft);overflow-wrap:anywhere;max-height:9rem;overflow:auto}
+.cipher b{color:var(--ink);font-family:var(--f-ui)}
+.empty{text-align:center;color:var(--soft);margin-top:16vh;padding:0 1rem}
+.back{display:none}
+.confirm{color:var(--warn);font-weight:600;font-size:.8rem}
+
+/* Community */
+.comm{max-width:1000px;margin:0 auto;padding:1.4rem 16px 8rem;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:1rem 1.4rem;align-items:start}
+.comm>.main{display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.rules{position:sticky;top:4rem;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:1rem 1.1rem;font-size:.85rem}
+.rules ul{padding-left:1.1rem;margin:.4rem 0 .7rem}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.composer textarea{border:none;background:transparent;padding:0;resize:vertical;font-family:var(--f-write);font-size:1.03rem}
+.crow{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:.6rem;margin-top:.4rem}
+.crow select,.crow input{width:auto;flex:0 1 160px;border-radius:999px;padding:.35rem .7rem}
+.crow .btn{margin-left:auto}
+.filters{display:flex;gap:.3rem;flex-wrap:wrap}
+.post header{display:flex;gap:.65rem;align-items:center}
+.ava{width:2.2rem;height:2.2rem;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:none}
+.you{font-size:.68rem;background:var(--asoft);padding:.05rem .45rem;border-radius:999px}
+.pbody{white-space:pre-wrap;font-family:var(--f-write);margin:.7rem 0;overflow-wrap:anywhere}
+.post{border-left:4px solid var(--line)}
+.post[data-mood=vent]{border-left-color:#c46a5a}.post[data-mood=sad]{border-left-color:#6d8fb3}.post[data-mood=anxious]{border-left-color:#9b7cc2}.post[data-mood=hopeful],.post[data-mood=grateful],.post[data-mood=happy]{border-left-color:#7c9a6d}
+.support{background:var(--asoft);border-radius:10px;padding:.55rem .8rem;font-size:.8rem;margin-bottom:.5rem}
+.post footer{display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:.5rem}
+.react{border:1px solid var(--line);background:none;border-radius:999px;padding:.12rem .55rem;font-variant-numeric:tabular-nums}
+.react.on{background:var(--asoft);border-color:var(--accent)}
+.link{background:none;border:none;color:var(--accent);font-weight:500;font-size:.84rem;padding:0}
+.comments{margin-top:.6rem;padding-top:.4rem;border-top:1px dashed var(--line);font-size:.86rem}
+.comments p{margin:.15rem 0 .5rem 1rem;white-space:pre-wrap}
+.reply{display:flex;gap:.4rem}.reply input{border-radius:999px;padding:.35rem .75rem}
+
+/* Settings */
+.set{max-width:800px;margin:0 auto;padding:1.4rem 16px 8rem;display:flex;flex-direction:column;gap:1rem}
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;margin-top:.6rem}
+.theme{text-align:left;background:var(--paper2);border:2px solid transparent;border-radius:14px;padding:.45rem;display:flex;flex-direction:column;gap:.1rem}
+.theme.on{border-color:var(--accent)}
+.swatch{height:62px;border-radius:9px;padding:.5rem;display:flex;flex-direction:column;justify-content:flex-end;gap:.25rem;margin-bottom:.25rem;font-family:'Caveat',cursive;font-size:1.1rem}
+.swatch i{display:block;width:40%;height:5px;border-radius:3px}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem;align-items:center}
+.petpick button{background:var(--paper2);border:2px solid transparent;border-radius:14px;padding:.3rem .7rem;display:flex;flex-direction:column;align-items:center;font-size:.78rem;text-transform:capitalize}
+.petpick button.on{border-color:var(--accent)}
+.seclist{list-style:none;padding:0;font-size:.86rem;display:grid;gap:.3rem}
+
+/* Pet */
+.dock{position:fixed;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+.petbtn{background:none;border:none;padding:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.14))}
+.bubble{position:relative;max-width:min(300px,calc(100vw - 40px));background:var(--paper);border:1px solid var(--line);border-radius:18px 18px 4px 18px;padding:.7rem 2rem .7rem .9rem;box-shadow:var(--shadow);font-size:.88rem;animation:pop .25s ease-out}
+.bubble p{margin:0}.bubble .x{position:absolute;top:.25rem;right:.4rem;border:none;background:none;font-size:1.1rem;color:var(--soft)}
+.panel{width:min(350px,calc(100vw - 32px));background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;max-height:68vh;animation:pop .2s ease-out}
+.panel header{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;border-bottom:1px solid var(--line)}
+.lv{margin-left:.4rem;font-size:.7rem;background:var(--asoft);padding:.1rem .5rem;border-radius:999px}
+.meters{display:grid;gap:.3rem;padding:.55rem 1rem}
+.meter{display:grid;grid-template-columns:52px 1fr 34px;gap:.5rem;align-items:center;font-size:.74rem;color:var(--soft);font-variant-numeric:tabular-nums}
+.meter div{height:7px;background:var(--paper2);border-radius:99px;overflow:hidden}
+.meter div i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .5s}
+.log{flex:1;overflow-y:auto;padding:.4rem 1rem;display:flex;flex-direction:column;gap:.4rem;min-height:130px}
+.msg{margin:0;padding:.45rem .7rem;border-radius:14px;font-size:.86rem;max-width:85%}
+.msg.pet{background:var(--paper2);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.me{background:var(--accent);color:var(--aink);align-self:flex-end;border-bottom-right-radius:4px}
+.quick{display:flex;gap:.3rem;flex-wrap:wrap;padding:0 1rem .45rem}
+.quick button{border:1px solid var(--line);background:none;border-radius:999px;font-size:.73rem;padding:.15rem .55rem}
+.pin{display:flex;gap:.4rem;padding:.55rem;border-top:1px solid var(--line)}
+.pin input{border-radius:999px}
+.p-body{fill:var(--petb)}.p-inner{fill:var(--peti)}.p-belly{fill:var(--petbelly)}.p-ink{stroke:#3a2a26}.p-inkf{fill:#3a2a26}
+.p-bob{animation:bob 2.6s ease-in-out infinite;transform-origin:60px 108px}
+.f-excited .p-bob{animation:hop .6s ease-in-out 3}
+.f-sleepy .p-bob{animation:bob 4.5s ease-in-out infinite}
+.breathing .p-bob{animation:breathe 14s ease-in-out infinite}
+.p-eyes{animation:blink 4.5s infinite;transform-origin:60px 62px}
+.petbtn:hover .p-bob{animation:wiggle .5s}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes hop{30%{transform:scaleY(.9)}60%{transform:translateY(-14px) scaleY(1.05)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes wiggle{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes breathe{0%,100%{transform:scale(1)}28%,57%{transform:scale(1.14)}}
+@keyframes pop{from{transform:scale(.92) translateY(6px);opacity:0}}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+@media (max-width:1050px){
+  .journal{grid-template-columns:210px minmax(0,1fr);height:auto}
+  .pane{display:none}
+  .journal.open{grid-template-columns:minmax(0,1fr)}
+  .journal.open .side,.journal.open .list{display:none}
+  .journal.open .pane{display:block}
+  .back{display:inline}
+}
+@media (max-width:700px){
+  .journal{grid-template-columns:minmax(0,1fr)}
+  .side{border-right:none;border-bottom:1px solid var(--line)}
+  .lock{grid-template-columns:1fr}
+  .points{display:none}
+  .comm{grid-template-columns:minmax(0,1fr)}.rules{position:static}
+  .title{font-size:1.45rem}
+  .petbtn svg{width:72px;height:72px}
+}
+</style>
+
+<div class="app" id="app" data-skin="auto" data-font="serif">
+  <div class="ribbon">Live demo · runs entirely in your browser with <b>real AES‑256 encryption</b>. The community and sync server are simulated.</div>
+  <div id="root" style="display:flex;flex-direction:column;flex:1"></div>
+</div>
+
+<script>
+'use strict';
+/* ───────────── storage (best effort) ───────────── */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const h=(html)=>{const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild};
+
+/* ───────────── crypto (same scheme as the real app) ───────────── */
+const te=new TextEncoder(),td=new TextDecoder();
+const b64=u=>{u=new Uint8Array(u);let s='';for(const c of u)s+=String.fromCharCode(c);return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function derive(pw,salt,purpose){const base=await crypto.subtle.importKey('raw',te.encode(pw.normalize('NFKC')),'PBKDF2',false,['deriveBits']);return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:new Uint8Array([...salt,...te.encode('|inkpaw|'+purpose)]),iterations:310000},base,256)}
+async function encJSON(key,o){const iv=crypto.getRandomValues(new Uint8Array(12));return{ct:b64(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify(o)))),iv:b64(iv)}}
+async function decJSON(key,r){return JSON.parse(td.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(r.iv)},key,unb64(r.ct))))}
+
+/* ───────────── state ───────────── */
+const S={vault:LS.get('ink.vault',null),records:LS.get('ink.records',{}),dek:null,entries:[],tab:'journal',current:null,filter:{cat:null,tag:null,mood:null,fav:false,q:''},
+  settings:LS.get('ink.settings',{skin:'auto',font:'serif',petName:'Mochi',species:'cat',name:''}),pet:LS.get('ink.pet',{xp:20,hunger:55,fed:Date.now()-6*3600e3}),
+  posts:null,showCipher:false};
+const CATS=['Personal','Gratitude','Dreams','Work','Study','Travel','Ideas'];
+const MOODS=[['happy','😊'],['excited','🤩'],['calm','😌'],['grateful','🥰'],['tired','😴'],['anxious','😰'],['sad','😢'],['angry','😤']];
+const moodE=id=>(MOODS.find(m=>m[0]===id)||[])[1]||'';
+const TEMPL=[['📄','Blank page','Personal',''],['🌤️','Daily reflection','Personal','<h2>Today I felt…</h2><p><br></p><h2>Highlight of the day</h2><p><br></p><h2>Tomorrow I want to…</h2><p><br></p>'],['🙏','Gratitude list','Gratitude','<blockquote>Gratitude turns what we have into enough.</blockquote><h2>Three things I’m grateful for</h2><ul class="check"><li><br></li><li><br></li><li><br></li></ul>'],['🌙','Dream log','Dreams','<h2>What happened</h2><p><br></p><h2>How it felt</h2><p><br></p>'],['✅','Plan my day','Work','<h2>Top 3</h2><ul class="check"><li><br></li><li><br></li><li><br></li></ul><h2>Notes</h2><p><br></p>'],['🌋','Private vent','Personal','<blockquote>This page is just for me. No one else can read it.</blockquote><p><br></p>']];
+const SAMPLE=[
+ {d:0,title:'Small wins on a slow Thursday',cat:'Personal',mood:'calm',tags:['wins','college'],fav:true,html:'<p>Finally submitted the project report draft. My review slot is next week and I feel <mark>surprisingly okay</mark> about it.</p><h2>Little wins</h2><ul class="check"><li class="done">Finished chapter 3</li><li class="done">Called home</li><li>Laundry (tomorrow…)</li></ul>'},
+ {d:1,title:'Things I’m grateful for',cat:'Gratitude',mood:'grateful',tags:['gratitude'],html:'<blockquote>Gratitude turns what we have into enough.</blockquote><ul class="check"><li class="done">Chai with friends after class</li><li class="done">The mountains looking clear this morning</li><li class="done">A good night of sleep</li></ul>'},
+ {d:2,title:'Exam anxiety, written out',cat:'Study',mood:'anxious',tags:['exams','worries'],html:'<p>I keep overthinking the viva. Writing the worries down so they stop circling.</p><ol><li>What if I blank on the architecture question?</li><li>What if the demo crashes?</li></ol><p>Things I can control: practise the walkthrough twice, keep a backup video.</p>'},
+ {d:5,title:'Flying over the old house',cat:'Dreams',mood:'excited',tags:['dreams'],html:'<h2>What happened</h2><p>I could fly, but only if I didn’t look down. The old house had a staircase that kept going up into the clouds.</p>'},
+ {d:9,title:'Trip ideas for the break',cat:'Travel',mood:'happy',tags:['travel','plans'],html:'<p>Rishikesh for a weekend? Or Mussoorie early in the morning before the crowds.</p><ul><li>Pack light</li><li>Camera battery!</li></ul>'}];
+
+/* ───────────── pet brain ───────────── */
+const LEX={sad:['sad','cry','lonely','alone','miss','hurt','down','empty','upset','unhappy'],anxious:['anxious','anxiety','worried','worry','nervous','scared','panic','overthinking','stress','exam','deadline','overwhelmed','viva'],angry:['angry','mad','furious','annoyed','hate','frustrated','unfair'],tired:['tired','exhausted','sleepy','drained','burnout'],happy:['happy','great','excited','amazing','fun','proud','awesome','yay','win','wins'],grateful:['grateful','thankful','thank','appreciate','lucky']};
+const CRISIS=[/\b(kill|hurt|harm)\s+my\s*self\b/i,/\bsuicid/i,/\bend\s+(it all|my life)\b/i,/\bdon'?t\s+want\s+to\s+(live|be alive|wake up)\b/i,/\bself[-\s]?harm/i];
+const SUPPORT="I'm really glad you told me. You deserve support from a real person right now. In India you can call Tele-MANAS on 14416 (free, 24/7); elsewhere, findahelpline.com lists free lines. If you're in immediate danger, please contact local emergency services. I'm right here too. 🤍";
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const PROMPTS=['What made you smile today, even a little?','Describe this exact moment using all five senses.','What’s something you could set down today?','Write a short letter to yourself one year from now.','What are three tiny wins from this week?','Name a feeling you had today and where you felt it in your body.'];
+function detectMood(t){t=' '+t.toLowerCase()+' ';let best='neutral',sc=0;for(const[m,w]of Object.entries(LEX)){const s=w.filter(x=>t.includes(' '+x)).length;if(s>sc){sc=s;best=m}}return best}
+const isCrisis=t=>CRISIS.some(r=>r.test(t));
+function stats(){const days=new Set(S.entries.map(e=>new Date(e.created).toLocaleDateString('en-CA')));let st=0;const c=new Date();if(!days.has(c.toLocaleDateString('en-CA')))c.setDate(c.getDate()-1);while(days.has(c.toLocaleDateString('en-CA'))){st++;c.setDate(c.getDate()-1)}return{total:S.entries.length,streak:st}}
+const hunger=()=>Math.max(0,Math.round(S.pet.hunger-(Date.now()-S.pet.fed)/7.2e6));
+const level=()=>Math.floor(Math.sqrt(S.pet.xp/10))+1;
+function petReply(m){
+  const n=S.settings.name||'friend',pn=S.settings.petName;
+  if(isCrisis(m))return{t:SUPPORT,f:'calm'};
+  const R=[[/\b(hi|hello|hey|hii+)\b/i,()=>({t:pick([`Hi ${n}! 🐾`,'Hello hello! *happy tail wiggle*','Hey you! I was napping on your journal.']),f:'happy'})],
+   [/\b(prompt|idea|what (should|can) i write)\b/i,()=>({t:`Here’s one: “${pick(PROMPTS)}”`,f:'thinking'})],
+   [/\b(pet|pat|cuddle|hug)\b/i,()=>{S.pet.xp+=1;savePet();return{t:pick(['*purrrr* 💕','*leans into your hand*','Best. Human. Ever.']),f:'love'}}],
+   [/\b(feed|food|hungry|snack)\b/i,()=>({t:hunger()<60?'Every entry you write is a snack for me! 🍙':'I’m full and happy, thank you! 😋',f:'hungry'})],
+   [/\b(breath|breathe|calm|panic)\b/i,()=>({t:'Breathe with me: in 4… hold 4… out 6. Watch me grow and shrink 🌬️',f:'calm',a:'breathe'})],
+   [/\b(streak|stats|how many)\b/i,()=>{const s=stats();return{t:`You’ve written ${s.total} entries and your streak is ${s.streak} day${s.streak===1?'':'s'}. ✨`,f:'excited'}}],
+   [/\b(private|secure|safe|encrypt)/i,()=>({t:'Your entries are locked in your browser before they leave it. Only your password can unlock them. 🔐 Try “Show stored data” on any page!',f:'happy'})],
+   [/\b(who are you|your name)\b/i,()=>({t:`I’m ${pn}! I live in your journal and get happier when you write. 🐾`,f:'happy'})],
+   [/\b(thank|thanks|ty)\b/i,()=>({t:'Anytime! 💛',f:'love'})],
+   [/\b(bye|good ?night|gn)\b/i,()=>({t:`Sweet dreams, ${n}. I’ll guard your pages. 🌙`,f:'sleepy'})]];
+  for(const[r,fn]of R)if(r.test(m))return fn();
+  const mood=detectMood(m);
+  const RE={sad:['That sounds really heavy. Want to write about it? I’ll sit with you. 🫂','Sending you the softest paw-hug.'],anxious:['Let’s breathe: in for 4… hold 4… out for 6. Again? 🌬️','Worries shrink on paper. List them, then circle what you can control.'],angry:['It’s okay to be angry. Vent it out in a private entry, I won’t tell.'],tired:['Rest is productive too. 😴'],happy:['Yay!! Let’s save this moment in your journal ✨'],grateful:['Gratitude looks good on you 💛'],neutral:['Tell me more! 🐾','Mm-hmm, I’m listening.','Want to turn that into an entry?']};
+  const F={sad:'sad',anxious:'calm',angry:'calm',tired:'sleepy',happy:'excited',grateful:'love',neutral:'thinking'};
+  return{t:pick(RE[mood]),f:F[mood]};
+}
+
+/* ───────────── pet SVG ───────────── */
+function petSVG(face,sp,size){
+  const ears={cat:'<path d="M30 38L36 12L54 30Z" class="p-body"/><path d="M90 38L84 12L66 30Z" class="p-body"/><path d="M36 32L39 19L48 29Z" class="p-inner"/><path d="M84 32L81 19L72 29Z" class="p-inner"/>',
+   bunny:'<ellipse cx="44" cy="16" rx="9" ry="24" class="p-body" transform="rotate(-10 44 16)"/><ellipse cx="76" cy="16" rx="9" ry="24" class="p-body" transform="rotate(10 76 16)"/><ellipse cx="44" cy="18" rx="4" ry="16" class="p-inner" transform="rotate(-10 44 18)"/><ellipse cx="76" cy="18" rx="4" ry="16" class="p-inner" transform="rotate(10 76 18)"/>',
+   bear:'<circle cx="34" cy="32" r="13" class="p-body"/><circle cx="86" cy="32" r="13" class="p-body"/><circle cx="34" cy="32" r="6" class="p-inner"/><circle cx="86" cy="32" r="6" class="p-inner"/>'}[sp]||'';
+  const happyEyes='<g class="p-ink" fill="none" stroke-width="3.5" stroke-linecap="round"><path d="M42 64q6-8 12 0"/><path d="M66 64q6-8 12 0"/></g>';
+  const eyes={sleepy:'<g class="p-ink" fill="none" stroke-width="3" stroke-linecap="round"><path d="M42 62q6 4 12 0"/><path d="M66 62q6 4 12 0"/></g>',happy:happyEyes,excited:happyEyes,
+   love:'<g fill="#e25c7a"><path d="M48 66l-6-6a3.5 3.5 0 0 1 6-4a3.5 3.5 0 0 1 6 4z"/><path d="M72 66l-6-6a3.5 3.5 0 0 1 6-4a3.5 3.5 0 0 1 6 4z"/></g>',
+   sad:'<g class="p-eyes"><ellipse cx="48" cy="62" rx="5" ry="6" class="p-inkf"/><ellipse cx="72" cy="62" rx="5" ry="6" class="p-inkf"/></g><path d="M40 54l10-3M80 54l-10-3" class="p-ink" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="44" cy="73" rx="2.5" ry="4" fill="#8ec5ff"/>'}[face]||'<g class="p-eyes"><ellipse cx="48" cy="62" rx="5.5" ry="7" class="p-inkf"/><ellipse cx="72" cy="62" rx="5.5" ry="7" class="p-inkf"/><circle cx="50" cy="59" r="2" fill="#fff"/><circle cx="74" cy="59" r="2" fill="#fff"/></g>';
+  const nose=sp==='bear'?'<ellipse cx="60" cy="72" rx="5" ry="3.5" class="p-inkf"/>':'<path d="M57 70h6l-3 3z" fill="#e27b8d"/>';
+  const mouth=face==='sad'?'<path d="M54 82q6-5 12 0" class="p-ink" fill="none" stroke-width="2.5" stroke-linecap="round"/>':(face==='excited'||face==='love')?'<path d="M52 76q8 12 16 0z" fill="#b5485e"/>':face==='hungry'?'<ellipse cx="60" cy="80" rx="5" ry="6" fill="#b5485e"/>':face==='sleepy'?'<ellipse cx="60" cy="79" rx="3" ry="2.5" fill="#b5485e"/>':'<path d="M52 76q4 4 8 0q4 4 8 0" class="p-ink" fill="none" stroke-width="2.5" stroke-linecap="round"/>';
+  const wh=sp==='cat'?'<g class="p-ink" stroke-width="1.5" stroke-linecap="round" opacity=".5"><path d="M28 72h-12M28 77l-11 3M92 72h12M92 77l11 3"/></g>':'';
+  const zz=face==='sleepy'?'<text x="92" y="30" font-family="Fraunces,serif" font-weight="700" font-size="14" fill="currentColor" opacity=".6">z<tspan dy="-6" font-size="10">z</tspan></text>':'';
+  return `<svg viewBox="0 0 120 120" width="${size}" height="${size}" class="f-${face}" aria-hidden="true"><ellipse cx="60" cy="112" rx="34" ry="5" fill="rgba(0,0,0,.12)"/><g class="p-bob">${ears}<path d="M60 28C92 28 104 52 104 74C104 98 86 108 60 108C34 108 16 98 16 74C16 52 28 28 60 28Z" class="p-body"/><ellipse cx="60" cy="88" rx="22" ry="16" class="p-belly"/><ellipse cx="36" cy="76" rx="7" ry="4.5" fill="#f59fb0" opacity=".55"/><ellipse cx="84" cy="76" rx="7" ry="4.5" fill="#f59fb0" opacity=".55"/>${eyes}${nose}${mouth}${wh}${zz}</g></svg>`;
+}
+
+/* ───────────── persistence ───────────── */
+const saveSettings=()=>LS.set('ink.settings',S.settings);
+const savePet=()=>LS.set('ink.pet',S.pet);
+function applySkin(){const a=$('#app');a.dataset.skin=S.settings.skin;a.dataset.font=S.settings.font}
+let syncTimer;
+function flashSync(){const p=$('#sync');if(!p)return;p.classList.add('busy');p.lastChild.textContent=' Syncing…';clearTimeout(syncTimer);syncTimer=setTimeout(()=>{p.classList.remove('busy');p.lastChild.textContent=' Synced · encrypted'},700)}
+async function saveEntry(e){
+  e.updated=new Date().toISOString();
+  S.records[e.id]=await encJSON(S.dek,e);
+  LS.set('ink.records',S.records);
+  const i=S.entries.findIndex(x=>x.id===e.id);if(i<0)S.entries.unshift(e);else S.entries[i]=e;
+  S.entries.sort((a,b)=>new Date(b.created)-new Date(a.created));
+  flashSync();
+}
+
+/* ───────────── lock / unlock ───────────── */
+function renderLock(){
+  const fresh=!S.vault;
+  const root=$('#root');root.innerHTML='';
+  root.append(h(`<div class="lock">
+   <div class="lock-art"><div>${petSVG(fresh?'excited':'sleepy',S.settings.species,150)}</div>
+    <p class="speech">${fresh?'Hi! I’m Mochi. Pick a password and I’ll make you a journal only you can read ✨':`Zzz… oh! Hi ${esc(S.settings.name)}. Your journal locked itself to stay safe.`}</p>
+    <ul class="points"><li>🔐 End-to-end encrypted with your password</li><li>☁️ Syncs across devices, works offline</li><li>🌷 An anonymous room to vent, kindly</li></ul></div>
+   <form class="lock-card" id="lockf">
+    <div class="brand">🐾 Inkpaw</div>
+    <h1>${fresh?'Create your journal':'Journal locked 🔒'}</h1>
+    ${fresh?'<label for="nm">What should I call you?<input id="nm" required maxlength="40" value="Aarav"></label>':''}
+    <label for="pw">${fresh?'Choose a password':'Password'}<input id="pw" type="password" required minlength="${fresh?6:1}" autocomplete="${fresh?'new-password':'current-password'}" ${fresh?'value="mochi-demo"':''}></label>
+    <p class="muted tiny">${fresh?'Demo password pre-filled: <b>mochi-demo</b>. Your password derives the key with PBKDF2 (310,000 rounds); it is never stored.':'Your key was cleared from memory. Enter your password to decrypt.'}</p>
+    <p class="err" id="err"></p>
+    <button class="btn" id="go">${fresh?'Create my journal':'Unlock'}</button>
+    ${fresh?'':'<button type="button" class="btn ghost sm" id="reset">Reset demo</button>'}
+   </form></div>`));
+  $('#lockf').onsubmit=async ev=>{
+    ev.preventDefault();const pw=$('#pw').value,go=$('#go');go.disabled=true;go.textContent='Deriving keys…';
+    try{
+      if(fresh){
+        const salt=crypto.getRandomValues(new Uint8Array(16));
+        const kek=await crypto.subtle.importKey('raw',await derive(pw,salt,'enc'),'AES-GCM',false,['encrypt']);
+        const dek=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+        const iv=crypto.getRandomValues(new Uint8Array(12));
+        const wrapped=await crypto.subtle.encrypt({name:'AES-GCM',iv},kek,await crypto.subtle.exportKey('raw',dek));
+        S.vault={salt:b64(salt),wrapped:b64(wrapped),iv:b64(iv)};LS.set('ink.vault',S.vault);
+        S.settings.name=$('#nm').value.trim();saveSettings();
+        S.dek=await crypto.subtle.importKey('raw',await crypto.subtle.exportKey('raw',dek),'AES-GCM',false,['encrypt','decrypt']);
+        S.entries=[];
+        for(const s of SAMPLE){const d=new Date();d.setDate(d.getDate()-s.d);d.setHours(20,15);await saveEntry({id:crypto.randomUUID(),title:s.title,html:s.html,text:h('<div>'+s.html.replace(/<\/(p|h\d|li|blockquote)>/g,' $&')+'</div>').textContent.replace(/\s+/g,' ').trim(),category:s.cat,mood:s.mood,tags:s.tags,favorite:!!s.fav,attachments:[],created:d.toISOString()})}
+      }else{
+        const kek=await crypto.subtle.importKey('raw',await derive(pw,unb64(S.vault.salt),'enc'),'AES-GCM',false,['decrypt']);
+        let raw;try{raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(S.vault.iv)},kek,unb64(S.vault.wrapped))}catch{throw new Error('That password didn’t unlock the journal. Check it and try again.')}
+        S.dek=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt']);
+        S.entries=[];for(const r of Object.values(S.records)){try{S.entries.push(await decJSON(S.dek,r))}catch{}}
+        S.entries.sort((a,b)=>new Date(b.created)-new Date(a.created));
+      }
+      renderApp();greet();
+    }catch(e){$('#err').textContent=e.message;go.disabled=false;go.textContent=fresh?'Create my journal':'Unlock'}
+  };
+  const r=$('#reset');if(r)r.onclick=()=>{if(r.dataset.sure){try{['ink.vault','ink.records','ink.settings','ink.pet','ink.posts'].forEach(k=>localStorage.removeItem(k))}catch{}S.vault=null;S.records={};S.posts=null;renderLock()}else{r.dataset.sure=1;r.textContent='Tap again to erase the demo journal'}};
+}
+function lock(){S.dek=null;S.entries=[];S.current=null;renderLock()}
+
+/* ───────────── app shell ───────────── */
+function renderApp(){
+  const root=$('#root');root.innerHTML='';
+  root.append(h(`<nav class="top"><span class="brand">🐾 Inkpaw</span>
+    <div class="tabs" role="tablist">${[['journal','Journal'],['community','Community'],['settings','Settings']].map(([k,l])=>`<button role="tab" data-tab="${k}" class="${S.tab===k?'on':''}">${l}</button>`).join('')}</div>
+    <span class="sync" id="sync"><i></i> Synced · encrypted</span>
+    <button class="icon" id="lockbtn" title="Lock journal" aria-label="Lock journal">🔒</button></nav>`));
+  root.append(h('<div class="view" id="view"></div>'));
+  root.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;root.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('on',x===b));renderView()});
+  $('#lockbtn').onclick=lock;
+  renderView();renderPet();
+}
+function renderView(){({journal:renderJournal,community:renderCommunity,settings:renderSettings})[S.tab]()}
+
+/* ───────────── journal ───────────── */
+function visible(){const f=S.filter,q=f.q.trim().toLowerCase();return S.entries.filter(e=>(!f.cat||e.category===f.cat)&&(!f.tag||e.tags.includes(f.tag))&&(!f.mood||e.mood===f.mood)&&(!f.fav||e.favorite)&&(!q||(e.title+' '+e.text+' '+e.tags.join(' ')).toLowerCase().includes(q)))}
+function renderJournal(){
+  const v=$('#view');v.innerHTML='';
+  const j=h(`<div class="journal ${S.current?'open':''}"><aside class="side" id="side"></aside><section class="list" id="list" aria-label="Entries"></section><section class="pane" id="pane"></section></div>`);
+  v.append(j);renderSide();renderList();renderPane();
+}
+function renderSide(){
+  const cats=[...new Set([...CATS,...S.entries.map(e=>e.category)])];
+  const tagc={};S.entries.forEach(e=>e.tags.forEach(t=>tagc[t]=(tagc[t]||0)+1));
+  const f=S.filter,side=$('#side');
+  side.innerHTML=`<div class="newwrap"><button class="btn" style="width:100%" id="newb">✎ New entry</button><div class="tpl" id="tpl" hidden>${TEMPL.map((t,i)=>`<button data-t="${i}"><span>${t[0]}</span>${t[1]}</button>`).join('')}</div></div>
+   <input class="search" id="q" type="search" placeholder="Search your journal…" aria-label="Search" value="${esc(f.q)}">
+   <p class="muted tiny">Search runs on decrypted text in this tab only.</p>
+   <button class="filt ${f.fav?'on':''}" id="favf">★ Favorites<small>${S.entries.filter(e=>e.favorite).length}</small></button>
+   <h5>Categories</h5>${cats.map(c=>`<button class="filt ${f.cat===c?'on':''}" data-cat="${esc(c)}">${esc(c)}<small>${S.entries.filter(e=>e.category===c).length||''}</small></button>`).join('')}
+   <h5>Moods</h5><div class="moods">${MOODS.map(([id,e])=>`<button class="mood ${f.mood===id?'on':''}" data-mood="${id}" title="${id}" aria-label="${id}">${e}</button>`).join('')}</div>
+   <h5>Tags</h5><div class="tags">${Object.entries(tagc).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<button class="tag ${f.tag===t?'on':''}" data-tag="${esc(t)}">#${esc(t)} <small>${n}</small></button>`).join('')||'<span class="muted tiny">Tags you add show up here.</span>'}</div>`;
+  $('#newb').onclick=()=>{$('#tpl').hidden=!$('#tpl').hidden};
+  side.querySelectorAll('[data-t]').forEach(b=>b.onclick=async()=>{const t=TEMPL[b.dataset.t];const e={id:crypto.randomUUID(),title:'',html:t[3],text:'',category:S.filter.cat||t[2],mood:null,tags:S.filter.tag?[S.filter.tag]:[],favorite:false,attachments:[],created:new Date().toISOString()};await saveEntry(e);S.current=e.id;renderJournal();setTimeout(()=>$('#title')?.focus(),50)});
+  $('#q').oninput=e=>{S.filter.q=e.target.value;renderList()};
+  $('#favf').onclick=()=>{f.fav=!f.fav;renderSide();renderList()};
+  side.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{f.cat=f.cat===b.dataset.cat?null:b.dataset.cat;renderSide();renderList()});
+  side.querySelectorAll('[data-mood]').forEach(b=>b.onclick=()=>{f.mood=f.mood===b.dataset.mood?null:b.dataset.mood;renderSide();renderList()});
+  side.querySelectorAll('[data-tag]').forEach(b=>b.onclick=()=>{f.tag=f.tag===b.dataset.tag?null:b.dataset.tag;renderSide();renderList()});
+}
+function renderList(){
+  const list=$('#list'),vis=visible(),f=S.filter;
+  const head=f.cat||(f.tag&&'#'+f.tag)||(f.fav?'Favorites':'All entries');
+  let html=`<div style="display:flex;align-items:baseline;gap:.5rem;padding:0 .3rem"><h2 style="font-size:1.2rem">${esc(head)}</h2><span class="muted tiny">${vis.length}</span>${(f.cat||f.tag||f.mood||f.fav||f.q)?'<button class="link" id="clr">clear</button>':''}</div>`;
+  if(!vis.length)html+=`<p class="muted" style="text-align:center;margin-top:2rem">${S.entries.length?'Nothing matches those filters.':'Your journal is waiting for its first page.'}</p>`;
+  let month='';
+  for(const e of vis){const d=new Date(e.created),m=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+    if(m!==month){month=m;html+=`<div class="month">${m}</div>`}
+    html+=`<button class="card ${e.id===S.current?'on':''}" data-id="${e.id}"><div class="date"><b>${d.getDate()}</b><span>${d.toLocaleDateString(undefined,{weekday:'short'})}</span></div><div class="card-b"><h3>${e.favorite?'<span style="color:#e5a823">★ </span>':''}${esc(e.title||'Untitled')} ${moodE(e.mood)}</h3><p>${esc((e.text||'').slice(0,110))||'<em>Empty page</em>'}</p><div class="meta"><span class="cat">${esc(e.category)}</span>${e.tags.slice(0,3).map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}${e.attachments.length?`<span class="muted tiny">📎 ${e.attachments.length}</span>`:''}</div></div></button>`}
+  list.innerHTML=html;
+  list.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{S.current=b.dataset.id;renderJournal()});
+  const c=$('#clr');if(c)c.onclick=()=>{S.filter={cat:null,tag:null,mood:null,fav:false,q:''};renderSide();renderList()};
+}
+let saveT;
+function renderPane(){
+  const pane=$('#pane'),e=S.entries.find(x=>x.id===S.current);
+  if(!e){pane.innerHTML=`<div class="empty"><div style="font-size:3rem">✒️</div><h2>Pick a page or start a new one</h2><p>Everything is encrypted in this tab with a key only your password unlocks.</p></div>`;return}
+  const cats=[...new Set([...CATS,...S.entries.map(x=>x.category)])];
+  pane.innerHTML=`<article class="page">
+   <div class="ptop"><button class="link back" id="back">← Entries</button><time>${new Date(e.created).toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</time>
+    <span class="saved" id="saved">🔐 Saved & encrypted</span>
+    <button class="icon star ${e.favorite?'on':''}" id="fav" aria-label="Favorite" aria-pressed="${e.favorite}">★</button>
+    <button class="icon" id="del" aria-label="Delete entry">🗑</button></div>
+   <input class="title" id="title" placeholder="Give today a title…" maxlength="140" value="${esc(e.title)}" aria-label="Title">
+   <div class="mrow"><label class="muted tiny" for="cat">Category</label><select id="cat">${cats.map(c=>`<option ${c===e.category?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <div class="moods" role="radiogroup" aria-label="Mood">${MOODS.map(([id,em])=>`<button class="mood ${e.mood===id?'on':''}" data-m="${id}" role="radio" aria-checked="${e.mood===id}" title="${id}">${em}</button>`).join('')}</div></div>
+   <div class="taginput" id="tagbox"></div>
+   <div class="tb" role="toolbar" aria-label="Formatting">
+    <button data-b="H1">H1</button><button data-b="H2">H2</button><button data-b="H3">H3</button><span class="sep"></span>
+    <button data-c="bold" title="Bold"><b>B</b></button><button data-c="italic" title="Italic"><i>I</i></button><button data-c="underline" title="Underline"><u>U</u></button><button data-c="strikeThrough" title="Strikethrough"><s>S</s></button><button data-hl title="Highlight"><mark>H</mark></button><span class="sep"></span>
+    <button data-b="BLOCKQUOTE" title="Quote">❝</button><button data-c="insertUnorderedList" title="Bullet list">•</button><button data-c="insertOrderedList" title="Numbered list">1.</button><button data-check title="Checklist">☑</button><button data-c="insertHorizontalRule" title="Divider">—</button><span class="sep"></span>
+    <button data-c="undo" title="Undo">↶</button><button data-c="redo" title="Redo">↷</button>
+    <button class="md" id="mdt" title="Edit as Markdown">Md</button></div>
+   <div class="ed" id="ed" contenteditable="true" spellcheck="true" aria-label="Entry text">${e.html}</div>
+   <div class="efoot"><span id="wc"></span><span>Type <kbd>#</kbd> <kbd>##</kbd> <kbd>&gt;</kbd> <kbd>-</kbd> <kbd>[ ]</kbd> then space</span></div>
+   <section class="att" id="att"><div class="atthead"><strong>Attachments</strong><label class="btn ghost sm" for="file">+ Add photo or file</label><input id="file" type="file" multiple hidden accept="image/*,application/pdf,text/*"></div><div class="attgrid" id="attg"></div><p class="muted tiny" style="margin:.4rem 0 0">Drop files here. Encrypted before storage (demo keeps them in this tab).</p></section>
+   <button class="link" id="ciph" style="margin-top:.8rem">${S.showCipher?'Hide':'Show'} stored data (what the server sees)</button>
+   <div class="cipher" id="cipher" ${S.showCipher?'':'hidden'}></div>
+  </article>`;
+  const ed=$('#ed');
+  const commit=()=>{e.html=ed.innerHTML;e.text=ed.innerText.trim();$('#wc').textContent=(e.text.match(/\S+/g)||[]).length+' words';$('#saved').textContent='Saving…';
+    clearTimeout(saveT);saveT=setTimeout(async()=>{if(!e.mood&&!e.moodManual&&e.text.length>40){const m=detectMood(e.text);if(['happy','sad','anxious','angry','tired','grateful'].includes(m)){e.mood=m;pane.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===m))}}
+      await saveEntry(e);$('#saved').textContent='🔐 Saved & encrypted';renderList();renderCipher(e);
+      if(!e._reacted&&e.text.length>60){e._reacted=1;S.pet.hunger=Math.min(100,hunger()+25);S.pet.fed=Date.now();S.pet.xp+=10;savePet();reactTo(e.text)}},700)};
+  $('#wc').textContent=((e.text||'').match(/\S+/g)||[]).length+' words';
+  $('#back').onclick=()=>{S.current=null;renderJournal()};
+  $('#title').oninput=ev=>{e.title=ev.target.value;commit()};
+  $('#cat').onchange=ev=>{e.category=ev.target.value;commit()};
+  $('#fav').onclick=ev=>{e.favorite=!e.favorite;ev.currentTarget.classList.toggle('on',e.favorite);commit()};
+  const del=$('#del');del.onclick=async()=>{if(!del.dataset.sure){del.dataset.sure=1;del.innerHTML='<span class="confirm">Delete?</span>';setTimeout(()=>{del.dataset.sure='';del.textContent='🗑'},3000);return}
+    delete S.records[e.id];LS.set('ink.records',S.records);S.entries=S.entries.filter(x=>x.id!==e.id);S.current=null;flashSync();renderJournal()};
+  pane.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{e.mood=e.mood===b.dataset.m?null:b.dataset.m;e.moodManual=true;pane.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x.dataset.m===e.mood));commit()});
+  // tags
+  const tb=$('#tagbox');const drawTags=()=>{tb.innerHTML=e.tags.map(t=>`<span class="tag">#${esc(t)}<button data-x="${esc(t)}" aria-label="Remove ${esc(t)}">×</button></span>`).join('')+'<input id="tagin" placeholder="#add tags" aria-label="Add tag">';
+    tb.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{e.tags=e.tags.filter(x=>x!==b.dataset.x);drawTags();commit();renderSide()});
+    const inp=$('#tagin');const add=()=>{const t=inp.value.trim().toLowerCase().replace(/^#/,'').replace(/[^\p{L}\p{N}_-]/gu,'').slice(0,24);if(t&&!e.tags.includes(t)){e.tags.push(t);drawTags();commit();renderSide();$('#tagin').focus()}else inp.value=''};
+    inp.onkeydown=k=>{if(['Enter',',',' '].includes(k.key)){k.preventDefault();add()}else if(k.key==='Backspace'&&!inp.value&&e.tags.length){e.tags.pop();drawTags();commit();renderSide();$('#tagin').focus()}}};
+  drawTags();
+  // toolbar
+  pane.querySelectorAll('.tb button').forEach(b=>b.onmousedown=ev=>ev.preventDefault());
+  pane.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{document.execCommand(b.dataset.c);commit()});
+  pane.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const cur=document.queryCommandValue('formatBlock').toUpperCase();document.execCommand('formatBlock',false,cur===b.dataset.b?'P':b.dataset.b);commit()});
+  $('[data-hl]').onclick=()=>{const s=getSelection();if(!s.rangeCount||s.isCollapsed)return;const r=s.getRangeAt(0),m=document.createElement('mark');try{r.surroundContents(m)}catch{}commit()};
+  $('[data-check]').onclick=()=>{insertChecklist();commit()};
+  ed.oninput=()=>{mdShortcut(ed);commit()};
+  ed.onclick=ev=>{const li=ev.target.closest('ul.check li');if(li&&ev.offsetX<22){li.classList.toggle('done');commit()}};
+  ed.onkeydown=ev=>{if(ev.key==='Enter'){const li=getSelection().anchorNode?.parentElement?.closest?.('ul.check li');if(li)setTimeout(()=>{const n=getSelection().anchorNode;const l2=(n.nodeType===1?n:n.parentElement).closest('li');if(l2)l2.classList.remove('done')},0)}};
+  // markdown mode
+  let md=false;$('#mdt').onclick=()=>{const b=$('#mdt');if(!md){const ta=h(`<textarea class="mdsrc" id="mds" aria-label="Markdown source"></textarea>`);ta.value=toMD(ed);ed.hidden=true;ed.after(ta);b.textContent='Done';md=true}else{const ta=$('#mds');ed.innerHTML=fromMD(ta.value);ta.remove();ed.hidden=false;b.textContent='Md';md=false;commit()}};
+  // attachments
+  const drawAtt=()=>{$('#attg').innerHTML=e.attachments.map((a,i)=>`<figure>${a.url&&a.type.startsWith('image')?`<img src="${a.url}" alt="${esc(a.name)}">`:`<div class="file">${a.url?'📄':'🔒'}</div>`}<figcaption><span title="${esc(a.name)}">${esc(a.name)}</span><button class="icon" data-ra="${i}" aria-label="Remove">×</button></figcaption></figure>`).join('');
+    pane.querySelectorAll('[data-ra]').forEach(b=>b.onclick=()=>{e.attachments.splice(+b.dataset.ra,1);drawAtt();commit()})};
+  const addFiles=async files=>{for(const f of files){if(f.size>10*1024*1024){reactSay({t:`${f.name} is over 10 MB. Try a smaller file.`,f:'sad'});continue}
+      const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},S.dek,await f.arrayBuffer());
+      e.attachments.push({name:f.name,type:f.type||'file',size:f.size,cipherBytes:ct.byteLength,url:URL.createObjectURL(new Blob([await crypto.subtle.decrypt({name:'AES-GCM',iv},S.dek,ct)],{type:f.type}))})}
+    drawAtt();commit()};
+  $('#file').onchange=ev=>addFiles([...ev.target.files]);
+  const att=$('#att');att.ondragover=ev=>{ev.preventDefault();att.classList.add('drag')};att.ondragleave=()=>att.classList.remove('drag');att.ondrop=ev=>{ev.preventDefault();att.classList.remove('drag');addFiles([...ev.dataTransfer.files])};
+  drawAtt();
+  $('#ciph').onclick=()=>{S.showCipher=!S.showCipher;$('#cipher').hidden=!S.showCipher;$('#ciph').textContent=(S.showCipher?'Hide':'Show')+' stored data (what the server sees)';renderCipher(e)};
+  renderCipher(e);
+}
+function renderCipher(e){const c=$('#cipher');if(!c||c.hidden)return;const r=S.records[e.id];c.innerHTML=r?`<b>clientId</b> ${e.id}<br><b>iv</b> ${r.iv}<br><b>ciphertext</b> ${r.ct.slice(0,520)}${r.ct.length>520?'…':''}<br><span>${r.ct.length.toLocaleString()} base64 chars. Title, text, tags, mood and category are all inside.</span>`:'Not saved yet.'}
+function insertChecklist(){const s=getSelection();const ul=h('<ul class="check"><li><br></li></ul>');if(!s.rangeCount)return;const r=s.getRangeAt(0);let blk=r.startContainer;blk=(blk.nodeType===1?blk:blk.parentElement).closest('#ed > *');if(blk){blk.after(ul)}else{$('#ed').append(ul)}const nr=document.createRange();nr.setStart(ul.firstChild,0);s.removeAllRanges();s.addRange(nr)}
+function mdShortcut(ed){const s=getSelection();if(!s.rangeCount)return;const n=s.anchorNode;if(n.nodeType!==3)return;const t=n.textContent;
+  const map=[[/^#\s$/,'H1'],[/^##\s$/,'H2'],[/^###\s$/,'H3'],[/^>\s$/,'BLOCKQUOTE']];
+  for(const[re,tag]of map)if(re.test(t)){n.textContent='';document.execCommand('formatBlock',false,tag);return}
+  if(/^[-*]\s$/.test(t)){n.textContent='';document.execCommand('insertUnorderedList');return}
+  if(/^1\.\s$/.test(t)){n.textContent='';document.execCommand('insertOrderedList');return}
+  if(/^\[\s?\]\s$/.test(t)){n.textContent='';insertChecklist()}}
+function toMD(ed){const inl=el=>[...el.childNodes].map(c=>c.nodeType===3?c.textContent:({B:'**',STRONG:'**',I:'*',EM:'*',S:'~~',STRIKE:'~~',MARK:'=='}[c.tagName]?(({B:'**',STRONG:'**',I:'*',EM:'*',S:'~~',STRIKE:'~~',MARK:'=='}[c.tagName])+inl(c)+({B:'**',STRONG:'**',I:'*',EM:'*',S:'~~',STRIKE:'~~',MARK:'=='}[c.tagName])):c.tagName==='BR'?'':inl(c))).join('');
+  return[...ed.children].map(el=>{const tg=el.tagName;if(/^H[1-3]$/.test(tg))return'#'.repeat(+tg[1])+' '+inl(el);if(tg==='BLOCKQUOTE')return'> '+inl(el);if(tg==='HR')return'---';
+    if(tg==='UL'&&el.classList.contains('check'))return[...el.children].map(li=>`- [${li.classList.contains('done')?'x':' '}] `+inl(li)).join('\n');if(tg==='UL')return[...el.children].map(li=>'- '+inl(li)).join('\n');if(tg==='OL')return[...el.children].map((li,i)=>`${i+1}. `+inl(li)).join('\n');return inl(el)}).join('\n\n')}
+function fromMD(src){const inl=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/~~(.+?)~~/g,'<s>$1</s>').replace(/==(.+?)==/g,'<mark>$1</mark>');
+  const out=[];let list=null;const close=()=>{if(list){out.push(`<${list.t}${list.c?' class="check"':''}>${list.items.join('')}</${list.t}>`);list=null}};
+  for(const line of src.split('\n')){let m;
+    if(m=line.match(/^- \[( |x)\] (.*)/i)){if(!list||!list.c){close();list={t:'ul',c:1,items:[]}}list.items.push(`<li${m[1].toLowerCase()==='x'?' class="done"':''}>${inl(m[2])||'<br>'}</li>`);continue}
+    if(m=line.match(/^[-*] (.*)/)){if(!list||list.t!=='ul'||list.c){close();list={t:'ul',items:[]}}list.items.push(`<li>${inl(m[1])}</li>`);continue}
+    if(m=line.match(/^\d+\. (.*)/)){if(!list||list.t!=='ol'){close();list={t:'ol',items:[]}}list.items.push(`<li>${inl(m[1])}</li>`);continue}
+    close();if(!line.trim())continue;
+    if(m=line.match(/^(#{1,3}) (.*)/))out.push(`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`);else if(m=line.match(/^> ?(.*)/))out.push(`<blockquote>${inl(m[1])}</blockquote>`);else if(/^---+$/.test(line))out.push('<hr>');else out.push(`<p>${inl(line)}</p>`)}
+  close();return out.join('')||'<p><br></p>'}
+
+/* ───────────── community (simulated server) ───────────── */
+const CMOODS=[['vent','🌋','Just venting'],['sad','🌧️','Sad'],['anxious','🌀','Anxious'],['angry','🔥','Angry'],['tired','🌙','Tired'],['hopeful','🌱','Hopeful'],['grateful','🌻','Grateful'],['happy','☀️','Happy']];
+const REACT=[['hug','🫂'],['heart','💛'],['same','🤝'],['strength','💪']];
+const ADJ=['Quiet','Gentle','Sleepy','Brave','Cozy','Soft','Wandering','Hopeful','Dreamy','Kind','Misty','Velvet'],ANI=['Otter','Fox','Owl','Panda','Koala','Sparrow','Hedgehog','Bunny','Seal','Moth','Deer','Robin'],COL=['#b06f48','#5f8a55','#4f7aa3','#a3607c','#7f62b0','#9a8030','#3f8a86','#b05a4a'];
+const alias=()=>({alias:pick(ADJ)+' '+pick(ANI),color:pick(COL)});
+const scrub=t=>t.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g,'[email removed]').replace(/(\+?\d[\d\s-]{8,}\d)/g,'[number removed]').replace(/https?:\/\/\S+/gi,'[link removed]').replace(/@\w{2,}/g,'[handle removed]');
+function seedPosts(){const ago=m=>new Date(Date.now()-m*60000).toISOString();return[
+ {id:'p1',...alias(),body:'Does anyone else feel like they’re falling behind everyone their age? Final year is making me spiral a bit. Just needed to say it somewhere.',mood:'anxious',tags:['college'],r:{hug:14,heart:6,same:22,strength:5},mine:[],comments:[{...alias(),body:'Same here. Everyone posts their wins, nobody posts the 3am panic. You’re not behind.',at:ago(30)}],at:ago(48)},
+ {id:'p2',...alias(),body:'Small thing but I finally went for a walk after two weeks of staying in. The sky was so pink. 🌸',mood:'hopeful',tags:['small-wins'],r:{hug:2,heart:31,same:4,strength:9},mine:[],comments:[],at:ago(130)},
+ {id:'p3',...alias(),body:'My roommate keeps eating my food and acting like I’m the problem when I bring it up. I’m so tired of being the “chill” one.',mood:'vent',tags:['roommates'],r:{hug:5,heart:3,same:11,strength:2},mine:[],comments:[],at:ago(400)},
+ {id:'p4',...alias(),body:'Grateful for the stranger who helped me carry groceries up three floors today. Faith in people: restored.',mood:'grateful',tags:[],r:{hug:1,heart:40,same:0,strength:3},mine:[],comments:[],at:ago(1500)}]}
+const ago=d=>{const s=(Date.now()-new Date(d))/1000;return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':new Date(d).toLocaleDateString()};
+let cf={mood:null,mine:false};
+function renderCommunity(){
+  if(!S.posts)S.posts=LS.get('ink.posts',null)||seedPosts();
+  const v=$('#view');v.innerHTML=`<div class="comm"><div class="main">
+   <div><h1>The Quiet Room</h1><p class="muted" style="margin:.3rem 0 0;max-width:62ch">Share or vent anonymously. Every post gets a fresh nickname, contact details and links are stripped, and nothing ties it back to your journal.</p></div>
+   <form class="box composer" id="comp"><textarea id="cbody" rows="4" maxlength="2000" placeholder="What’s on your mind? You’re anonymous here." aria-label="Post"></textarea>
+    <div class="crow"><select id="cmood" aria-label="Mood">${CMOODS.map(m=>`<option value="${m[0]}">${m[1]} ${m[2]}</option>`).join('')}</select><input id="ctags" placeholder="#tags (optional)" aria-label="Tags"><span class="muted tiny" id="ccount">0/2000</span><button class="btn">Post anonymously</button></div>
+    <p class="err" id="cerr"></p></form>
+   <div class="filters"><button class="chip ${!cf.mood&&!cf.mine?'on':''}" data-cm="">All</button>${CMOODS.map(m=>`<button class="chip ${cf.mood===m[0]?'on':''}" data-cm="${m[0]}">${m[1]} ${m[2]}</button>`).join('')}<button class="chip ${cf.mine?'on':''}" id="minef">My posts</button></div>
+   <div id="feed" style="display:flex;flex-direction:column;gap:.8rem"></div></div>
+   <aside class="rules"><h3 style="font-size:1.05rem">Room rules</h3><ul><li>Be kind. Everyone here is carrying something.</li><li>Support, don’t fix, unless someone asks for advice.</li><li>No names, contact details, or identifying info.</li><li>Three reports hide a post for review.</li></ul><p class="small" style="margin:0">In crisis? India: Tele-MANAS <b>14416</b>. Elsewhere: findahelpline.com</p></aside></div>`;
+  $('#cbody').oninput=e=>$('#ccount').textContent=e.target.value.length+'/2000';
+  $('#comp').onsubmit=ev=>{ev.preventDefault();const body=$('#cbody').value.trim();if(body.length<3){$('#cerr').textContent='Write at least a few words before posting.';return}
+    const p={id:'p'+Date.now(),...alias(),body:scrub(body),mood:$('#cmood').value,tags:$('#ctags').value.split(/[,\s]+/).map(t=>t.replace(/^#/,'').toLowerCase()).filter(Boolean).slice(0,5),r:{hug:0,heart:0,same:0,strength:0},mine:[],own:true,support:isCrisis(body),comments:[],at:new Date().toISOString()};
+    S.posts.unshift(p);LS.set('ink.posts',S.posts);reactSay(p.support?{t:SUPPORT,f:'calm',stay:1}:{t:'Posted anonymously. Proud of you for sharing 💛',f:'love'});renderCommunity()};
+  v.querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>{cf={mood:b.dataset.cm||null,mine:false};renderCommunity()});
+  $('#minef').onclick=()=>{cf={mood:null,mine:!cf.mine};renderCommunity()};
+  const feed=$('#feed'),list=S.posts.filter(p=>(!cf.mood||p.mood===cf.mood)&&(!cf.mine||p.own)&&!p.hidden);
+  if(!list.length)feed.innerHTML='<p class="muted" style="text-align:center">It’s quiet here. Be the first to share something. 🌷</p>';
+  for(const p of list){const m=CMOODS.find(x=>x[0]===p.mood)||CMOODS[0];
+    const el=h(`<article class="box post" data-mood="${p.mood}"><header><span class="ava" style="background:${p.color}">${esc(p.alias[0])}</span><div><strong>${esc(p.alias)}</strong> ${p.own?'<span class="you">you</span>':''}<div class="muted tiny">${m[1]} ${m[2]} · ${ago(p.at)}</div></div><span style="flex:1"></span>${p.own?'<button class="link" data-a="del">Delete</button>':`<button class="link" data-a="rep">${p.reported?'Reported':'Report'}</button>`}</header>
+     <p class="pbody">${esc(p.body)}</p>${p.support?'<div class="support">💛 If this is you right now: you matter. Tele-MANAS (India) <b>14416</b>, or findahelpline.com elsewhere.</div>':''}
+     ${p.tags.length?`<div class="tags" style="margin-bottom:.4rem">${p.tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
+     <footer>${REACT.map(([k,e])=>`<button class="react ${p.mine.includes(k)?'on':''}" data-r="${k}" aria-label="${k}">${e} ${p.r[k]||''}</button>`).join('')}<span style="flex:1"></span><button class="link" data-a="cm">💬 ${p.comments.length||''} ${p.open?'Hide':'Reply'}</button></footer>
+     ${p.open?`<div class="comments">${p.comments.map(c=>`<div><span style="display:inline-block;width:.6rem;height:.6rem;border-radius:50%;background:${c.color}"></span> <strong>${esc(c.alias)}</strong> <span class="muted tiny">${ago(c.at)}</span><p>${esc(c.body)}</p></div>`).join('')}<form class="reply"><input maxlength="800" placeholder="Reply kindly…" aria-label="Reply"><button class="btn sm">Send</button></form></div>`:''}</article>`);
+    el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const k=b.dataset.r;if(p.mine.includes(k)){p.mine=p.mine.filter(x=>x!==k);p.r[k]--}else{p.mine.push(k);p.r[k]++}LS.set('ink.posts',S.posts);renderCommunity()});
+    el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==='cm')p.open=!p.open;if(a==='rep')p.reported=true;if(a==='del'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Tap to confirm';return}S.posts=S.posts.filter(x=>x!==p)}LS.set('ink.posts',S.posts);renderCommunity()});
+    const rf=el.querySelector('.reply');if(rf)rf.onsubmit=ev=>{ev.preventDefault();const t=rf.querySelector('input').value.trim();if(!t)return;p.comments.push({...(p.own?{alias:p.alias+' (OP)',color:p.color}:alias()),body:scrub(t),at:new Date().toISOString()});LS.set('ink.posts',S.posts);renderCommunity()};
+    feed.append(el)}
+}
+
+/* ───────────── settings ───────────── */
+const SKINS=[['auto','Match device','Follows light or dark mode',['#fbf6ea','#c0714f','#191d2a']],['parchment','Parchment','Warm paper & ink',['#fbf6ea','#c0714f','#3b2f2a']],['sakura','Sakura','Cherry-blossom pink',['#fffafb','#d0577e','#4a2c36']],['forest','Forest','Moss, fern & bark',['#f7f8f0','#557f4b','#26331f']],['ocean','Ocean','Sea glass & tide',['#f6fbfc','#337f95','#16323b']],['lavender','Lavender','Dreamy dusk',['#fbf9fe','#7f60bb','#2e2440']],['midnight','Midnight','Starlit dark',['#191d2a','#e4b363','#e8e6f0']]];
+function renderSettings(){
+  const s=S.settings,v=$('#view');
+  v.innerHTML=`<div class="set"><h1>Settings</h1>
+   <section class="box"><h3 style="font-size:1.1rem">Diary theme</h3><div class="themes">${SKINS.map(t=>`<button class="theme ${s.skin===t[0]?'on':''}" data-skin="${t[0]}"><div class="swatch" style="background:${t[3][0]};color:${t[3][2]}"><i style="background:${t[3][1]}"></i>Dear diary,</div><strong>${t[1]}</strong><small class="muted">${t[2]}</small></button>`).join('')}</div>
+    <h4 style="margin:1rem 0 .3rem">Writing font</h4><div class="row" style="margin:0">${[['serif','Book','Lora'],['hand','Handwritten','Caveat'],['sans','Clean','Inter'],['mono','Typewriter','JetBrains Mono']].map(f=>`<button class="chip ${s.font===f[0]?'on':''}" data-font="${f[0]}" style="font-family:'${f[2]}'">${f[1]}</button>`).join('')}</div></section>
+   <section class="box"><h3 style="font-size:1.1rem">Your pet</h3><div class="row petpick">${['cat','bunny','bear'].map(sp=>`<button class="${s.species===sp?'on':''}" data-sp="${sp}" aria-label="${sp}">${petSVG('happy',sp,70)}${sp}</button>`).join('')}</div>
+    <div class="row"><label for="pn" class="small" style="flex:1;max-width:280px">Pet name<input id="pn" maxlength="20" value="${esc(s.petName)}"></label><label for="un" class="small" style="flex:1;max-width:280px">Your name<input id="un" maxlength="40" value="${esc(s.name)}"></label></div></section>
+   <section class="box"><h3 style="font-size:1.1rem">Security</h3><ul class="seclist"><li>✅ Entries, titles, tags, moods and attachments are encrypted with AES‑256‑GCM in the browser.</li><li>✅ Your password never leaves the browser; the server stores only a bcrypt hash of a derived proof.</li><li>✅ The journal auto-locks after 15 minutes idle and wipes the key from memory.</li><li>✅ ${Object.keys(S.records).length} encrypted records stored in this demo.</li></ul>
+    <div class="row"><button class="btn ghost" id="lk">🔒 Lock now</button></div></section></div>`;
+  v.querySelectorAll('[data-skin]').forEach(b=>b.onclick=()=>{s.skin=b.dataset.skin;saveSettings();applySkin();renderSettings()});
+  v.querySelectorAll('[data-font]').forEach(b=>b.onclick=()=>{s.font=b.dataset.font;saveSettings();applySkin();renderSettings()});
+  v.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{s.species=b.dataset.sp;saveSettings();renderSettings();drawPet()});
+  $('#pn').onchange=e=>{s.petName=e.target.value.trim()||'Mochi';saveSettings();renderPet()};
+  $('#un').onchange=e=>{s.name=e.target.value.trim();saveSettings()};
+  $('#lk').onclick=lock;
+}
+
+/* ───────────── pet widget ───────────── */
+const P={face:'happy',open:false,chat:[],bubble:null,action:null,t:null};
+function renderPet(){
+  let d=$('#dock');if(!d){d=h('<div class="dock" id="dock"></div>');$('#root').append(d)}
+  const st=stats(),hg=hunger();
+  d.innerHTML=`${P.bubble&&!P.open?`<div class="bubble" role="status"><p>${esc(P.bubble)}</p><button class="x" id="bx" aria-label="Dismiss">×</button></div>`:''}
+   ${P.open?`<div class="panel" role="dialog" aria-label="Chat with ${esc(S.settings.petName)}"><header><div><strong>${esc(S.settings.petName)}</strong><span class="lv">Lv ${level()}</span></div><button class="icon" id="pclose" aria-label="Close">×</button></header>
+    <div class="meters"><div class="meter"><span>Tummy</span><div><i style="width:${hg}%"></i></div><small>${hg}%</small></div><div class="meter"><span>Streak</span><div><i style="width:${Math.min(100,st.streak*14)}%"></i></div><small>${st.streak}d</small></div></div>
+    <div class="log" id="log">${P.chat.length?'':`<p class="msg pet">Hi ${esc(S.settings.name||'friend')}! Talk to me, ask for a writing prompt, or say “breathe”. Our chat stays on this device. 🐾</p>`}${P.chat.map(m=>`<p class="msg ${m.from}">${esc(m.t)}</p>`).join('')}</div>
+    <div class="quick">${['Give me a prompt','Pet you','Breathe','My streak','Is it private?'].map(q=>`<button data-q="${q}">${q}</button>`).join('')}</div>
+    <form class="pin" id="pform"><input id="pinput" maxlength="300" placeholder="Say something to ${esc(S.settings.petName)}…" aria-label="Message"><button class="btn sm">Send</button></form></div>`:''}
+   <button class="petbtn ${P.action==='breathe'?'breathing':''}" id="petb" aria-label="${esc(S.settings.petName)}, your journal pet. Click to chat."></button>`;
+  drawPet();
+  $('#petb').onclick=()=>{P.open=!P.open;P.bubble=null;renderPet();if(P.open)$('#pinput')?.focus()};
+  const bx=$('#bx');if(bx)bx.onclick=()=>{P.bubble=null;renderPet()};
+  if(P.open){$('#pclose').onclick=()=>{P.open=false;renderPet()};const log=$('#log');log.scrollTop=log.scrollHeight;
+    d.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>send(b.dataset.q));
+    $('#pform').onsubmit=e=>{e.preventDefault();send($('#pinput').value)}}
+}
+function drawPet(){const b=$('#petb');if(b)b.innerHTML=petSVG(P.face,S.settings.species,92)}
+function send(t){t=t.trim();if(!t)return;const r=petReply(t);P.chat.push({from:'me',t},{from:'pet',t:r.t});P.chat=P.chat.slice(-40);P.face=r.f;P.action=r.a||null;renderPet();$('#pinput')?.focus()}
+function reactSay(r){P.face=r.f;P.bubble=r.t;P.action=r.a||null;renderPet();clearTimeout(P.t);if(!r.stay)P.t=setTimeout(()=>{P.bubble=null;P.action=null;renderPet()},8000)}
+function reactTo(text){if(isCrisis(text))return reactSay({t:SUPPORT,f:'calm',stay:1});const m=detectMood(text);reactSay({sad:{t:'Thank you for writing that down. That took courage. 🫂',f:'sad'},anxious:{t:'Saved. Your worries are on paper now, not just in your head. Want to breathe with me?',f:'calm'},angry:{t:'Vented and saved. Feel a little lighter? 🌬️',f:'calm'},tired:{t:'Saved! Now go rest, okay? 😴',f:'sleepy'},happy:{t:'Saved! This one’s going in my happy-memory pile ✨',f:'excited'},grateful:{t:'A gratitude entry! My favorite snack 🍙💛',f:'love'},neutral:{t:'Yum, words! Entry saved and locked 🔐',f:'happy'}}[m])}
+function greet(){setTimeout(()=>{const n=S.settings.name||'friend',hr=new Date().getHours(),tm=hr<5?'Still up':hr<12?'Good morning':hr<17?'Good afternoon':hr<22?'Good evening':'Hey night owl',st=stats();
+  if(hunger()<40)reactSay({t:`${tm}, ${n}… my tummy’s rumbling. Writing an entry feeds me! 🍙`,f:'hungry'});
+  else if(st.streak>=3)reactSay({t:`${tm}, ${n}! ${st.streak}-day streak, I’m so proud of you! ✨`,f:'excited'});
+  else reactSay({t:`${tm}, ${n}! I’m ${S.settings.petName}. How’s your heart today?`,f:'happy'})},700)}
+setInterval(()=>{if(!S.dek||P.bubble)return;const hr=new Date().getHours();P.face=hr>=23||hr<5?'sleepy':hunger()<30?'hungry':'happy';drawPet()},20000);
+/* auto-lock after 15 minutes idle */
+let idle;const bump=()=>{clearTimeout(idle);idle=setTimeout(()=>{if(S.dek)lock()},15*60*1000)};['pointerdown','keydown'].forEach(e=>addEventListener(e,bump,{passive:true}));bump();
+
+applySkin();renderLock();
+</script>

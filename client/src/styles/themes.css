@@ -1,0 +1,113 @@
+/* Diary themes — each is a set of tokens. Paper texture is drawn with gradients, no images. */
+
+:root,
+[data-theme='parchment'] {
+  --bg: #efe6d4;
+  --paper: #fbf6ea;
+  --paper-2: #f3ead7;
+  --ink: #3b2f2a;
+  --ink-soft: #7a685c;
+  --accent: #c0714f;
+  --accent-ink: #fff;
+  --accent-soft: #f2d9c9;
+  --line: #e2d4bb;
+  --rule: rgba(192, 113, 79, 0.12);
+  --shadow: 0 1px 2px rgba(59, 47, 42, 0.06), 0 8px 24px rgba(59, 47, 42, 0.08);
+  --pet-body: #f3c89a;
+  --pet-inner: #f0a98f;
+  --pet-belly: #fbe6cc;
+  --texture: radial-gradient(rgba(120, 90, 60, 0.05) 1px, transparent 1px);
+  color-scheme: light;
+}
+
+[data-theme='sakura'] {
+  --bg: #fbe4ea;
+  --paper: #fffafb;
+  --paper-2: #fdeef2;
+  --ink: #4a2c36;
+  --ink-soft: #8d6673;
+  --accent: #d9668a;
+  --accent-ink: #fff;
+  --accent-soft: #f9d4df;
+  --line: #f1cdd8;
+  --rule: rgba(217, 102, 138, 0.12);
+  --pet-body: #fdd3dd;
+  --pet-inner: #f39ab2;
+  --pet-belly: #fff0f4;
+  --texture: radial-gradient(rgba(217, 102, 138, 0.06) 1.2px, transparent 1.2px);
+}
+
+[data-theme='forest'] {
+  --bg: #dfe6d3;
+  --paper: #f7f8f0;
+  --paper-2: #edf1e3;
+  --ink: #26331f;
+  --ink-soft: #5e6d55;
+  --accent: #5f8a55;
+  --accent-ink: #fff;
+  --accent-soft: #d6e4cd;
+  --line: #d3dcc6;
+  --rule: rgba(95, 138, 85, 0.13);
+  --pet-body: #c9b38f;
+  --pet-inner: #a98d68;
+  --pet-belly: #ece2cf;
+  --texture: radial-gradient(rgba(60, 90, 50, 0.05) 1px, transparent 1px);
+}
+
+[data-theme='ocean'] {
+  --bg: #d6e9ee;
+  --paper: #f6fbfc;
+  --paper-2: #e8f3f6;
+  --ink: #16323b;
+  --ink-soft: #557680;
+  --accent: #3d8ca3;
+  --accent-ink: #fff;
+  --accent-soft: #cfe6ed;
+  --line: #c9e0e6;
+  --rule: rgba(61, 140, 163, 0.12);
+  --pet-body: #bfe0ea;
+  --pet-inner: #8cc4d4;
+  --pet-belly: #e9f6fa;
+  --texture: radial-gradient(rgba(61, 140, 163, 0.06) 1px, transparent 1px);
+}
+
+[data-theme='lavender'] {
+  --bg: #e6dff3;
+  --paper: #fbf9fe;
+  --paper-2: #f1ecf9;
+  --ink: #2e2440;
+  --ink-soft: #6f6385;
+  --accent: #8a6cc4;
+  --accent-ink: #fff;
+  --accent-soft: #e2d8f4;
+  --line: #ddd3ee;
+  --rule: rgba(138, 108, 196, 0.12);
+  --pet-body: #d9cdf2;
+  --pet-inner: #b9a3e6;
+  --pet-belly: #f3eefc;
+  --texture: radial-gradient(rgba(138, 108, 196, 0.06) 1px, transparent 1px);
+}
+
+[data-theme='midnight'] {
+  --bg: #0f121b;
+  --paper: #191d2a;
+  --paper-2: #212637;
+  --ink: #e8e6f0;
+  --ink-soft: #9a98ad;
+  --accent: #e4b363;
+  --accent-ink: #1b1608;
+  --accent-soft: #3a3322;
+  --line: #2c3245;
+  --rule: rgba(228, 179, 99, 0.08);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+  --pet-body: #5d6788;
+  --pet-inner: #8a93b8;
+  --pet-belly: #7a84a8;
+  --texture: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  color-scheme: dark;
+}
+
+[data-font='serif'] { --font-write: 'Lora', Georgia, serif; }
+[data-font='hand'] { --font-write: 'Caveat', 'Segoe Print', cursive; --write-size: 1.45rem; }
+[data-font='sans'] { --font-write: 'Inter', system-ui, sans-serif; }
+[data-font='mono'] { --font-write: 'JetBrains Mono', ui-monospace, monospace; --write-size: 0.98rem; }
