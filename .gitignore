@@ -1,5 +1,83 @@
-node_modules/
-dist/
+# ─────────────────────────────────────────────────────────────
+#  Secrets — never commit these
+# ─────────────────────────────────────────────────────────────
+
+# Environment files (any folder, any variant: .env, .env.local, .env.production …)
 .env
+.env.*
+*.env
+**/.env
+**/.env.*
+# …but DO commit the template with placeholder values
+!.env.example
+!**/.env.example
+
+# Private keys, certificates and keystores
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.ppk
+
+# Credential and token files
+secrets/
+secret*.json
+*secret*.txt
+credentials*.json
+service-account*.json
+*-service-account.json
+firebase-adminsdk*.json
+gcloud-*.json
+.npmrc
+.netrc
+.htpasswd
+*.token
+token.json
+.aws/
+.azure/
+
+# ─────────────────────────────────────────────────────────────
+#  Dependencies & build output
+# ─────────────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
+dist/
+build/
+coverage/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# ─────────────────────────────────────────────────────────────
+#  Logs, databases & local data
+# ─────────────────────────────────────────────────────────────
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.sqlite
+*.sqlite3
+*.db
+dump/
+data/db/
+uploads/
+
+# ─────────────────────────────────────────────────────────────
+#  OS & editor clutter
+# ─────────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
