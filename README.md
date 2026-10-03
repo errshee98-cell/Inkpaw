@@ -1,6 +1,7 @@
 # 🐾 Inkpaw — a private, end‑to‑end encrypted journal with a pet
 
 Intern ID: CITS8559
+
 Inkpaw is a full‑stack MERN journaling platform: a rich‑text + Markdown diary that's encrypted in your browser before it ever touches the server, syncs across devices, works offline, has six diary themes, an anonymous community for venting, and **Mochi** — a little virtual pet who greets you, chats with you, and gets happier when you write.
 
 ## Features
